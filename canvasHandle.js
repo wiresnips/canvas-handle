@@ -84,7 +84,7 @@ var CanvasHandle = (function () {
 
 		self.mouseDownPos = canvas.relMouseCoords(event);
 		self.deltaPos = [ self.mouseDownPos[0] - self.pos[0], self.mouseDownPos[1] - self.pos[1] ];
-		self.pos = newPos;
+		self.pos = self.mouseDownPos;
 
 			if (self.move != null)
 				self.move();
