@@ -82,9 +82,9 @@ var CanvasHandle = (function () {
 			if (self.disabled)
 				return killDrag(null);
 
-			var newPos = canvas.relMouseCoords(event);
-			self.deltaPos = [ newPos[0] - self.pos[0], newPos[1] - self.pos[1] ];
-			self.pos = newPos;
+		self.mouseDownPos = canvas.relMouseCoords(event);
+		self.deltaPos = [ self.mouseDownPos[0] - self.pos[0], self.mouseDownPos[1] - self.pos[1] ];
+		self.pos = newPos;
 
 			if (self.move != null)
 				self.move();
