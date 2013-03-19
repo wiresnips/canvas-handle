@@ -34,88 +34,72 @@ var CanvasHandle = (function () {
 		return (xd * xd) + (yd * yd);
 	}
 
-	function __add2 (a, b) {
-		a[0] += b[0];
-		a[1] += b[1];
-		return a;
-	}
-
-	function __sub2 (a, b) {
-		a[0] -= b[0];
-		a[1] -= b[1];
-		return a;
-	}
-
-
 	////////////////////////////////////////////////
 	// here's the part that we actually care about
 	////////////////////////////////////////////////
 
 
 	function CanvasHandle (canvas, pos, grabRadius) {
-		var self = this;
 		var sqrGrabRadius = grabRadius * grabRadius; // faster math if it's squared beforehand
+		
+		// generally useful stuff
+		this.pos = pos;
+		this.deltaPos = [0,0];
+		this.mouseDownPos = null;
 
-		self.onMouseDown = null;
+		// hook functionality in here
+		this.grab = null;
+		this.move = null;
+		this.drop = null;
 
-		self.onGrab = null;
-		self.onMoveDelta = null;
-		self.onMove = null;
-		self.onDrop = null;
+		// toggle me on/off
+		this.disabled = false;
 
-		self.disabled = false;
 
-		function mouseDown (evt) {
-			var mousedownPos = canvas.relMouseCoords(evt);
+		// keep these private so they don't get accidentally overwritten
+		// and so I remember who I am when a listener on something else calls me
+		var self = this;
 
-			if (sqrDistance2(pos, mousedownPos) > sqrGrabRadius)
-				return;
-
-			// handle the mouse-down
-			if (!self.disabled && self.onMouseDown != null && !self.isLocked())
-				self.onMouseDown(mousedownPos);
-
-			// handle the drag
-			startDrag();
-		}
-
-		function startDrag () {
+		function startDrag (event) {
 			if (self.disabled || self.isLocked())
 				return;
 
-			self.lock();
+			var mouseDownPos = canvas.relMouseCoords(event);
+			if (sqrDistance2(self.pos, mouseDownPos) > sqrGrabRadius)
+				return;
 
-			if (self.onGrab != null)
-				self.onGrab(pos);
+			self.lock();
+			self.mouseDownPos = mouseDownPos;
+
+			if (self.grab != null)
+				self.grab();
 
 			bindEventListener(window, "mousemove", drag);
-			bindEventListener(window, "mouseup", killDrag);
+			bindEventListener(window, "mouseup", killDrag);		
 		}
 
-		function drag (evt) {
+		function drag (event) {
 			if (self.disabled)
 				return killDrag(null);
 
-			var movement = __sub2(canvas.relMouseCoords(evt), pos);
-			__add2(pos, movement);
+			var newPos = canvas.relMouseCoords(event);
+			self.deltaPos = [ newPos[0] - self.pos[0], newPos[1] - self.pos[1] ];
+			self.pos = newPos;
 
-			if (self.onMoveDelta != null)
-				self.onMoveDelta(movement);
-
-			if (self.onMove != null)
-				self.onMove(pos)
+			if (self.move != null)
+				self.move();
 		}
 
-		function killDrag (evt) {
-			if (self.onDrop != null)
-				self.onDrop(pos);
+		function killDrag () {
+			if (self.drop != null)
+				self.drop();
 
 			unbindEventListener(window, "mousemove", drag);
 			unbindEventListener(window, "mouseup", killDrag);
 			self.unlock();
 		}
 
-		bindEventListener(canvas, "mousedown", mouseDown);
+		bindEventListener(canvas, "mousedown", startDrag);
 	}
 
 	// this is a flag lock: only allow one handle to be grabbed at a time
