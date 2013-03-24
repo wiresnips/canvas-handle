@@ -1,7 +1,7 @@
 #CanvasHandle
 
 A nice easy grab-drag-drop handle for Canvas.
-For example usage, see [here](http://novorobo.com/programming/javascript/utilities/13-03-23_canvas-handle.html).
+For example usage, see [here](http://novorobo.com/programming/javascript/utilities/canvas-handle.html).
 
 ##Constructor Params
 ###canvas
