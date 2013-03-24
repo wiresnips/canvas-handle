@@ -20,13 +20,12 @@ var CanvasHandle = (function () {
 			target.detachEvent('on'+event, handler);
 	}
 
-	function relMouseCoords (event) {
-		var rect = this.getBoundingClientRect();
+	function relMouseCoords (target, event) {
+		var rect = target.getBoundingClientRect();
 		var x = event.clientX - rect.left;
 		var y = event.clientY - rect.top;
 		return [ x, y ];
 	}
-	HTMLCanvasElement.prototype.relMouseCoords = relMouseCoords;
 
 	function sqrDistance2 (a, b) {
 		var xd = a[0] - b[0];
@@ -64,7 +63,7 @@ var CanvasHandle = (function () {
 			if (self.disabled || self.isLocked())
 				return;
 
-			var mouseDownPos = canvas.relMouseCoords(event);
+			var mouseDownPos = relMouseCoords(canvas, event);
 			if (sqrDistance2(self.pos, mouseDownPos) > sqrGrabRadius)
 				return;
 
@@ -82,7 +81,7 @@ var CanvasHandle = (function () {
 			if (self.disabled)
 				return killDrag(null);
 
-		self.mouseDownPos = canvas.relMouseCoords(event);
+		self.mouseDownPos = relMouseCoords(canvas, event);
 		self.deltaPos = [ self.mouseDownPos[0] - self.pos[0], self.mouseDownPos[1] - self.pos[1] ];
 		self.pos = self.mouseDownPos;
 
